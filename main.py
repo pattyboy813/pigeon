@@ -1,13 +1,12 @@
-import os
 import asyncio
+import logging
+import os
 import pathlib
 import traceback
-import logging
-import time
-from dotenv import load_dotenv
 
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
 
 log = logging.getLogger("pigeon")
 
