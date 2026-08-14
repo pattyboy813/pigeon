@@ -1,3 +1,4 @@
 .env
 disc_exam/
 *__pycache__/
+.ruff_cache/
