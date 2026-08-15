@@ -6,7 +6,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-log = logging.getLogger("pigeon(Core)")
+log = logging.getLogger("pigeon")
+
+log_core = logging.getLogger("pigeon(Core)")
 
 STATUSES = {
     "online": "🟢 Online",
