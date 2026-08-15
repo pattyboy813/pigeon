@@ -10,13 +10,14 @@ from dotenv import load_dotenv
 
 log = logging.getLogger("pigeon")
 
-COGS_DIR = pathlib.Path(__file__).parent / "cogs"
+USER_COGS_DIR = pathlib.Path(__file__).parent / "cogs"
 
-HIDDEN_COGS_DIR = pathlib.Path(__file__).parent / "hidden_cogs"
+CORE_COGS_DIR = pathlib.Path(__file__).parent / "core"
 
 DEV_GUILD: int | None = 1528913550028836984
 
 load_dotenv()
+
 
 class Pigeon(commands.Bot):
     def __init__(self) -> None:
@@ -44,47 +45,49 @@ class Pigeon(commands.Bot):
     async def load_cogs(self) -> None:
 
         # "hidden" commands. just owner only commands
-        for hcog in sorted(HIDDEN_COGS_DIR.glob("*.py")): 
-            if hcog.stem.startswith("_"): # ignore init files or not finished files
+        for core in sorted(CORE_COGS_DIR.glob("*.py")):
+            if core.stem.startswith("_"):  # ignore init files or not finished files
                 continue
-            hextension = f"hidden_cogs.{hcog.stem}"
+            corecog = f"core.{core.stem}"
             try:
-                await self.load_extension(hextension)
-                log.info("Loaded hidden cog: %s", hextension)
-            except Exception:
-                log.error("Failed to load %s:\n %s", hextension, traceback.format_exc())
+                await self.load_extension(corecog)
+                log.info("Loaded hidden cog: %s", corecog)
+            except Exception:  # noqa: BLE001
+                log.error("Failed to load %s:\n %s", corecog, traceback.format_exc())
 
-        # normal commands, loads anything in cogs/ 
-        if not COGS_DIR.exists():
-            log.warning("Unable to locate cogs at %s", COGS_DIR)
+        # normal commands, loads anything in cogs/
+        if not USER_COGS_DIR.exists():
+            log.warning("Unable to locate cogs at %s", USER_COGS_DIR)
             return
         loaded = 0
-        for cog in sorted(COGS_DIR.glob("*.py")):
-            if cog.stem.startswith("_"): # ignore init files or not finished files
+        for cog in sorted(USER_COGS_DIR.glob("*.py")):
+            if cog.stem.startswith("_"):  # ignore init files or not finished files
                 continue
             extension = f"cogs.{cog.stem}"
             try:
                 await self.load_extension(extension)
                 loaded += 1
-            except Exception:
+            except Exception:  # noqa: BLE001
                 log.error("Failed to load %s:\n %s", extension, traceback.format_exc())
-        
+
         log.info("Cogs: %s", loaded)
-    
+
     async def on_ready(self) -> None:
         log.info("Connected to Discord as %s (id: %s)", self.user, self.user.id)
+
 
 async def main() -> None:
     discord.utils.setup_logging(level=logging.INFO)
 
     token = os.getenv("DISCORD_TOKEN")
     if not token:
-        raise SystemExit("No Discord token found. Unable to connect")
-    
+        raise SystemExit(log.critical("No Discord token found. Please set it!"))
+
     bot = Pigeon()
 
     async with bot:
         await bot.start(token)
+
 
 if __name__ == "__main__":
     try:
